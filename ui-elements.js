@@ -43,8 +43,6 @@ export const nextCell = element =>
     hasClass( element.nextSibling, 'notebook-cell' ) ? element.nextSibling :
     nextCell( element.nextSibling )
 
-export const currentCell = doc => firstInClass( doc, 'focused' )
-
 export const scrollToShow = target => {
     const cellBounding = target.getBoundingClientRect()
     const rowBounding =
@@ -54,14 +52,6 @@ export const scrollToShow = target => {
     else if ( cellBounding.bottom > rowBounding.bottom )
         target.scrollIntoView( false )
 }
-
-export const moveFocus = target => {
-    if ( !target ) return
-    const currentFocus = currentCell( target.ownerDocument )
-    if ( currentFocus ) removeClass( currentFocus, 'focused' )
-    addClass( target, 'focused' )
-    scrollToShow( target )
-}    
 
 export const cellOpposite = cell => {
     const centerOf = element => {
@@ -102,13 +92,6 @@ export const updateFileSelector = selector => {
         selector.value = oldValue
         if ( selector.value == '' ) selector.value = defaultChoice
     } )
-}
-
-export const switchFocusFrom = oneDoc => {
-    const cell = currentCell( oneDoc.ownerDocument )
-    if ( !cell || cell.parentNode != oneDoc ) return
-    const opp = cellOpposite( cell )
-    if ( opp ) moveFocus( opp )
 }
 
 export const swapContents = ( element1, element2 ) => {

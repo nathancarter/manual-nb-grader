@@ -19,46 +19,37 @@
             import { Files } from './files.js'
             import { promptAndUploadFiles } from './uploading.js'
             import {
-                updateFileSelector, addClass, removeClass, containingCell,
-                currentCell, moveFocus, nextCell, previousCell, scrollToShow,
-                switchFocusFrom, withFirstDo, cellOpposite, firstHeadingBefore,
-                firstHeadingAfter
+                addClass, removeClass, containingCell,
+                nextCell, previousCell, scrollToShow, cellOpposite,
+                withFirstDo, firstHeadingBefore, firstHeadingAfter
             } from './ui-elements.js'
-            import { Notebook } from './notebooks.js'
             import { installMarkdownConverter } from './representations.js'
             import { keyboardHandler } from './keyboard.js'
+            import {
+                getNotebooks, getSelectors, getDocuments,
+                currentCell, currentNotebook, currentSelector, currentDocument,
+                moveFocus, switchFocus, 
+                notebookForCell, setUpOntology, other
+            } from './main-ontology.js'
 
             window.addEventListener( 'load', () => {
+
+                // prepare main ontology (vocabulary for important stuff in the app)
+                setUpOntology( document )
 
                 // install a markdown converter
                 const converter = new showdown.Converter()
                 installMarkdownConverter( md => converter.makeHtml( md ) )
 
-                // set up documents with correct sizes/scrolling
-                const leftDocument = document.getElementById( 'left-document' )
-                const rightDocument = document.getElementById( 'right-document' )
+                // set up correct height for row containing documents
                 const topHeight = document.getElementById( 'menu-row' ).offsetHeight
                                 + document.getElementById( 'select-row' ).offsetHeight
                 document.getElementById( 'document-row' ).style.height =
                     `calc( 100% - ${topHeight}px )`
 
-                // populate file selectors initially, and whenever file lists change
-                const leftSelect = document.getElementById( 'left-file-select' )
-                const rightSelect = document.getElementById( 'right-file-select' )
-                const updateFileSelectors = () => {
-                    updateFileSelector( leftSelect )
-                    updateFileSelector( rightSelect )
-                }
-                Files.addEventListener( 'add', updateFileSelectors )
-                Files.addEventListener( 'delete', updateFileSelectors )
-                Files.addEventListener( 'deleted-all', updateFileSelectors )
-                updateFileSelectors()
-
                 // define some of the handlers used below
                 const withCurrentSelector = func => () => {
-                    const curr = currentCell( document )
-                    const select = curr && rightDocument.contains( curr ) ?
-                        rightSelect : leftSelect
+                    const select = currentSelector() || getSelectors()[0]
                     const changed = func( select )
                     if ( changed ) {
                         const event = document.createEvent( 'HTMLEvents' )
@@ -94,7 +85,7 @@
                         isSyncing() ? '(on)' : '(off)',
                         isSyncing() ? '(off)' : '(on)' )
                 const goToPreviousHeading = () => {
-                    const curr = currentCell( document )
+                    const curr = currentCell()
                     if ( curr ) {
                         moveFocus( firstHeadingBefore( curr ) )
                         if ( isSyncing() ) {
@@ -103,7 +94,7 @@
                     }
                 }
                 const goToNextHeading = () => {
-                    const curr = currentCell( document )
+                    const curr = currentCell()
                     if ( curr ) {
                         moveFocus( firstHeadingAfter( curr ) )
                         if ( isSyncing() ) {
@@ -116,7 +107,7 @@
                 uploadButton.addEventListener( 'click', promptAndUploadFiles, false )
                 clearButton.addEventListener( 'click', () => Files.deleteAll(), false )
                 commentButton.addEventListener( 'click',
-                    () => insertCommentAfter( currentCell( document ) ), false )
+                    () => insertCommentAfter( currentCell() ), false )
                 prevFileButton.addEventListener( 'click', goToPreviousFile, false )
                 nextFileButton.addEventListener( 'click', goToNextFile, false )
                 prevHeadingButton.addEventListener( 'click', goToPreviousHeading, false )
@@ -125,9 +116,8 @@
 
                 // tools for counting/classifying cell elements
                 const withCellDo = func => ( cellElement, ...args ) => {
-                    if ( !cellElement ) return { }
-                    const notebook = cellElement.parentNode == leftDocument ?
-                        leftNotebook : rightNotebook
+                    const notebook = notebookForCell( cellElement )
+                    if ( !notebook ) return { }
                     const index = notebook.cellElements().indexOf( cellElement )
                     func( notebook, index, ...args )
                 }
@@ -173,8 +163,7 @@
                 const duplicateComment = withCellDo( ( notebook, index ) =>
                     moveFocus( notebook.duplicateComment( index ) ) )
                 const copyAcross = withCellDo( ( notebook, index ) => {
-                    const otherNotebook = notebook == leftNotebook ?
-                        rightNotebook : leftNotebook
+                    const otherNotebook = other( notebook )
                     const otherCell = cellOpposite( notebook.cellElements()[index] )
                     const otherIndex = otherNotebook.cellElements().indexOf( otherCell )
                     if ( !otherCell || otherIndex < 0 ) return
@@ -185,9 +174,7 @@
                     notebook.startEditing( index ) )
 
                 // create two global notebook objects, one for each document
-                const leftNotebook = new Notebook( leftDocument )
-                const rightNotebook = new Notebook( rightDocument )
-                ;[ leftNotebook, rightNotebook ].forEach( notebook => {
+                getNotebooks().forEach( notebook => {
                     notebook.addEventListener( 'load', () => {
                         notebook.cellElements().forEach(
                             installEventHandlersForCell )
@@ -204,32 +191,20 @@
                 // add some keyboard shortcuts
                 document.addEventListener( 'keydown', keyboardHandler( {
                     ArrowUp    : () =>
-                        moveFocus( previousCell( currentCell( document ) ) ),
+                        moveFocus( previousCell( currentCell() ) ),
                     ArrowDown  : () =>
-                        moveFocus( nextCell( currentCell( document ) ) ),
-                    ArrowLeft  : () =>
-                        switchFocusFrom( rightDocument ),
-                    ArrowRight : () =>
-                        switchFocusFrom( leftDocument ),
+                        moveFocus( nextCell( currentCell() ) ),
+                    ArrowLeft  : switchFocus,
+                    ArrowRight : switchFocus,
                     '+' : () =>
-                        insertCommentAfter( currentCell( document ) ),
+                        insertCommentAfter( currentCell() ),
                     Enter : () =>
-                        editCell( currentCell( document ) ),
+                        editCell( currentCell() ),
                     'Meta+PageDown' : goToNextFile,
                     'Meta+PageUp' : goToPreviousFile,
                     PageDown : goToNextHeading,
                     PageUp : goToPreviousHeading
                 } ) )
-
-                // when the user chooses a file, load it on the respective side
-                ;[
-                    [ leftSelect, leftNotebook ],
-                    [ rightSelect, rightNotebook ]
-                ].forEach( pair => {
-                    const [ select, notebook ] = pair
-                    select.addEventListener( 'change', () =>
-                        notebook.read( select.value ) )
-                } )
             } )
         </script>
     </head>
