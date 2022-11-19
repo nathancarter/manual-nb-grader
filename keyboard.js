@@ -2,12 +2,16 @@
 const nameMatchesEvent = ( comboName, event ) => {
     const modifiers =
         { meta : false, shift : false, alt : false, control : false }
-    comboName.split( '+' ).forEach( entry => {
-        if ( modifiers.hasOwnProperty( entry.toLowerCase() ) )
-            modifiers[entry.toLowerCase()] = true
-        else
-            comboName = entry
-    } )
+    if ( comboName == '+' ) {
+        modifiers.shift = true
+    } else {
+        comboName.split( '+' ).forEach( entry => {
+            if ( modifiers.hasOwnProperty( entry.toLowerCase() ) )
+                modifiers[entry.toLowerCase()] = true
+            else
+                comboName = entry
+        } )
+    }
     return event.shiftKey == modifiers.shift
         && event.metaKey == modifiers.meta
         && event.altKey == modifiers.alt
