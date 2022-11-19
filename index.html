@@ -1,0 +1,311 @@
+<html>
+    <head>
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/purecss@3.0.0/build/pure-min.css"
+              integrity="sha384-X38yfunGUhNzHpBaEBsWLO+A0HDYOQi8ufWDkZ0k9e0eXz/tH3II7uKZ9msv++Ls"
+              crossorigin="anonymous"/>
+        <link rel="stylesheet" href="./pure-extension.css"/>
+        <meta name="viewport"
+              content="width=device-width, height=device-height, initial-scale=1"/>
+        <script src="https://kit.fontawesome.com/74c71ba5ba.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+        <script>
+            MathJax = { tex: { inlineMath:  [['$', '$']],
+                               displayMath: [['$$', '$$']] } };
+        </script>
+        <script type="text/javascript" id="MathJax-script" async
+                src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script type="module">
+            import { Files } from './files.js'
+            import {
+                stopDragDropEvents, uploadDroppedFiles, promptAndUploadFiles
+            } from './uploading.js'
+            import {
+                updateFileSelector, addClass, removeClass, containingCell,
+                currentCell, moveFocus, nextCell, previousCell, scrollToShow,
+                switchFocusFrom, withFirstDo, cellOpposite, firstHeadingBefore,
+                firstHeadingAfter
+            } from './ui-elements.js'
+            import { Notebook } from './notebooks.js'
+            import { installMarkdownConverter } from './representations.js'
+            import { keyboardHandler } from './keyboard.js'
+
+            window.addEventListener( 'load', () => {
+
+                // // set up files drag-and-drop
+                // const filesList = document.getElementById( 'filesList' )
+                // stopDragDropEvents( filesList )
+                // filesList.addEventListener( 'drop', uploadDroppedFiles, false )
+
+                // install a markdown converter
+                const converter = new showdown.Converter()
+                installMarkdownConverter( md => converter.makeHtml( md ) )
+
+                // set up documents with correct sizes/scrolling
+                const leftDocument = document.getElementById( 'left-document' )
+                const rightDocument = document.getElementById( 'right-document' )
+                const topHeight = document.getElementById( 'menu-row' ).offsetHeight
+                                + document.getElementById( 'select-row' ).offsetHeight
+                document.getElementById( 'document-row' ).style.height =
+                    `calc( 100% - ${topHeight}px )`
+
+                // populate file selectors initially, and whenever file lists change
+                const leftSelect = document.getElementById( 'left-file-select' )
+                const rightSelect = document.getElementById( 'right-file-select' )
+                const updateFileSelectors = () => {
+                    updateFileSelector( leftSelect )
+                    updateFileSelector( rightSelect )
+                }
+                Files.addEventListener( 'add', updateFileSelectors )
+                Files.addEventListener( 'delete', updateFileSelectors )
+                Files.addEventListener( 'deleted-all', updateFileSelectors )
+                updateFileSelectors()
+
+                // define some of the handlers used below
+                const withCurrentSelector = func => () => {
+                    const curr = currentCell( document )
+                    const select = curr && rightDocument.contains( curr ) ?
+                        rightSelect : leftSelect
+                    const changed = func( select )
+                    if ( changed ) {
+                        const event = document.createEvent( 'HTMLEvents' )
+                        event.initEvent( 'change', false, true )
+                        select.dispatchEvent( event )
+                    }
+                }
+                const goToPreviousFile = withCurrentSelector( select => {
+                    if ( select.selectedIndex > 0 )
+                        select.selectedIndex--
+                    return true
+                } )
+                const goToNextFile = withCurrentSelector( select => {
+                    if ( select.selectedIndex < select.length - 1 )
+                        select.selectedIndex++
+                    return true
+                } )
+
+                // name main UI controls
+                const uploadButton = document.getElementById( 'upload-button' )
+                const clearButton = document.getElementById( 'clear-button' )
+                const commentButton = document.getElementById( 'comment-button' )
+                const prevFileButton = document.getElementById( 'prev-file-button' )
+                const nextFileButton = document.getElementById( 'next-file-button' )
+                const prevHeadingButton = document.getElementById( 'prev-heading-button' )
+                const nextHeadingButton = document.getElementById( 'next-heading-button' )
+                const syncButton = document.getElementById( 'sync-button' )
+
+                // actions for syncing and navigating headings
+                const isSyncing = () => syncButton.lastChild.textContent.includes( '(on)' )
+                const toggleSync = () => syncButton.lastChild.textContent =
+                    syncButton.lastChild.textContent.replace(
+                        isSyncing() ? '(on)' : '(off)',
+                        isSyncing() ? '(off)' : '(on)' )
+                const goToPreviousHeading = () => {
+                    const curr = currentCell( document )
+                    if ( curr ) {
+                        moveFocus( firstHeadingBefore( curr ) )
+                        if ( isSyncing() ) {
+                            // must build here the "find heading on other side" code
+                        }
+                    }
+                }
+                const goToNextHeading = () => {
+                    const curr = currentCell( document )
+                    if ( curr ) {
+                        moveFocus( firstHeadingAfter( curr ) )
+                        if ( isSyncing() ) {
+                            // must build here the "find heading on other side" code
+                        }
+                    }
+                }
+
+                // install menu item event handlers
+                uploadButton.addEventListener( 'click', promptAndUploadFiles, false )
+                clearButton.addEventListener( 'click', () => Files.deleteAll(), false )
+                commentButton.addEventListener( 'click',
+                    () => insertCommentAfter( currentCell( document ) ), false )
+                prevFileButton.addEventListener( 'click', goToPreviousFile, false )
+                nextFileButton.addEventListener( 'click', goToNextFile, false )
+                prevHeadingButton.addEventListener( 'click', goToPreviousHeading, false )
+                nextHeadingButton.addEventListener( 'click', goToNextHeading, false )
+                syncButton.addEventListener( 'click', toggleSync, false )
+
+                // tools for counting/classifying cell elements
+                const withCellDo = func => ( cellElement, ...args ) => {
+                    if ( !cellElement ) return { }
+                    const notebook = cellElement.parentNode == leftDocument ?
+                        leftNotebook : rightNotebook
+                    const index = notebook.cellElements().indexOf( cellElement )
+                    func( notebook, index, ...args )
+                }
+                const just = func => event => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    func()
+                }
+
+                // each cell will need several event handlers installed
+                const installEventHandlersForCell = cellElement => {
+                    cellElement.addEventListener( 'click',
+                        event => moveFocus( cellElement ) )
+                    withFirstDo( cellElement, 'fa-trash', icon =>
+                        icon.parentNode.addEventListener( 'click',
+                            just( () => deleteComment( cellElement ) ) ) )
+                    withFirstDo( cellElement, 'fa-arrow-up', icon =>
+                        icon.parentNode.addEventListener( 'click',
+                            just( () => moveCell( cellElement, -1 ) ) ) )
+                    withFirstDo( cellElement, 'fa-arrow-down', icon =>
+                        icon.parentNode.addEventListener( 'click',
+                            just( () => moveCell( cellElement, +1 ) ) ) )
+                    withFirstDo( cellElement, 'fa-copy', icon =>
+                        icon.parentNode.addEventListener( 'click',
+                            just( () => duplicateComment( cellElement ) ) ) )
+                    withFirstDo( cellElement, 'fa-arrows-left-right', icon =>
+                        icon.parentNode.addEventListener( 'click',
+                            just( () => copyAcross( cellElement ) ) ) )
+                    withFirstDo( cellElement, 'fa-pen', icon =>
+                        icon.parentNode.addEventListener( 'click',
+                            just( () => editCell( cellElement ) ) ) )
+                }
+                // and here are the handlers:
+                const insertCommentAfter = withCellDo( ( notebook, index ) =>
+                    moveFocus( notebook.insertComment( index + 1,
+                        '(new comment -- double-click to edit)' ) ) )
+                const deleteComment = withCellDo( ( notebook, index ) => {
+                    notebook.deleteCell( index )
+                    moveFocus( notebook.cellElements()[index] )
+                } )
+                const moveCell = withCellDo( ( notebook, index, delta ) =>
+                    notebook.moveCell( index, delta ) )
+                const duplicateComment = withCellDo( ( notebook, index ) =>
+                    moveFocus( notebook.duplicateComment( index ) ) )
+                const copyAcross = withCellDo( ( notebook, index ) => {
+                    const otherNotebook = notebook == leftNotebook ?
+                        rightNotebook : leftNotebook
+                    const otherCell = cellOpposite( notebook.cellElements()[index] )
+                    const otherIndex = otherNotebook.cellElements().indexOf( otherCell )
+                    if ( !otherCell || otherIndex < 0 ) return
+                    otherNotebook.insertComment( otherIndex,
+                        notebook.commentMarkdown( index ) )
+                } )
+                const editCell = withCellDo( ( notebook, index ) =>
+                    notebook.startEditing( index ) )
+
+                // create two global notebook objects, one for each document
+                const leftNotebook = new Notebook( leftDocument )
+                const rightNotebook = new Notebook( rightDocument )
+                ;[ leftNotebook, rightNotebook ].forEach( notebook => {
+                    notebook.addEventListener( 'load', () => {
+                        notebook.cellElements().forEach(
+                            installEventHandlersForCell )
+                        moveFocus( notebook.cellElements()[0] )
+                        MathJax.typeset()
+                    } )
+                    notebook.addEventListener( 'insert', event => {
+                        installEventHandlersForCell( event.detail.cell )
+                        moveFocus( event.detail.cell )
+                        MathJax.typeset()
+                    } )
+                } )
+
+                // add some keyboard shortcuts
+                document.addEventListener( 'keydown', keyboardHandler( {
+                    ArrowUp    : () =>
+                        moveFocus( previousCell( currentCell( document ) ) ),
+                    ArrowDown  : () =>
+                        moveFocus( nextCell( currentCell( document ) ) ),
+                    ArrowLeft  : () =>
+                        switchFocusFrom( rightDocument ),
+                    ArrowRight : () =>
+                        switchFocusFrom( leftDocument ),
+                    '+' : () =>
+                        insertCommentAfter( currentCell( document ) ),
+                    Enter : () =>
+                        editCell( currentCell( document ) ),
+                    'Meta+PageDown' : goToNextFile,
+                    'Meta+PageUp' : goToPreviousFile,
+                    PageDown : goToNextHeading,
+                    PageUp : goToPreviousHeading
+                } ) )
+
+                // when the user chooses a file, load it on the respective side
+                ;[
+                    [ leftSelect, leftNotebook ],
+                    [ rightSelect, rightNotebook ]
+                ].forEach( pair => {
+                    const [ select, notebook ] = pair
+                    select.addEventListener( 'change', () =>
+                        notebook.read( select.value ) )
+                } )
+            } )
+        </script>
+    </head>
+    <body style="margin: 0 10px 0 10px;">
+        <div class="pure-g" id="menu-row">
+            <div class="pure-u-1-24">
+                <div class="pure-menu pure-menu-horizontal">
+                    <ul class="pure-menu-list">
+                        <li class="pure-menu-item">
+                            <a href="#" class="pure-menu-link" id="upload-button"><i class="fa-solid fa-file-arrow-up"></i> Upload</a>
+                        </li>
+                        <li class="pure-menu-item">
+                            <a href="#" class="pure-menu-link" id="prev-file-button"><i class="fa-solid fa-arrow-left"></i> Previous file</a>
+                        </li>
+                        <li class="pure-menu-item">
+                            <a href="#" class="pure-menu-link" id="next-file-button"><i class="fa-solid fa-arrow-right"></i> Next file</a>
+                        </li>
+                        <li class="pure-menu-item">
+                            <a href="#" class="pure-menu-link" id="prev-heading-button"><i class="fa-solid fa-arrow-up"></i> Previous heading</a>
+                        </li>
+                        <li class="pure-menu-item">
+                            <a href="#" class="pure-menu-link" id="next-heading-button"><i class="fa-solid fa-arrow-down"></i> Next heading</a>
+                        </li>
+                        <li class="pure-menu-item">
+                            <a href="#" class="pure-menu-link" id="sync-button"><i class="fa-solid fa-rotate"></i> Sync headings (on)</a>
+                        </li>
+                        <li class="pure-menu-item">
+                            <a href="#" class="pure-menu-link" id="clear-button"><i class="fa-solid fa-folder-minus"></i> Delete all files</a>
+                        </li>
+                        <li class="pure-menu-item">
+                            <a href="#" class="pure-menu-link" id="comment-button"><i class="fa-solid fa-comment"></i> Insert comment</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="pure-u-11-24">
+            </div>
+            <div class="pure-u-1-2">
+            </div>
+        </div>
+        <div class="pure-g" id="select-row">
+            <div class="pure-u-1-2">
+                <select name="left-file-select" id="left-file-select" style="width: 100%;">
+                </select>
+            </div>
+            <div class="pure-u-1-2">
+                <select name="right-file-select" id="right-file-select" style="width: 100%;">
+                </select>
+            </div>
+                <!-- <div class="pure-u-4-24" style="height: 100%; display: flex; flex-flow: column;">
+                <h2>Files</h2>
+                <p>Buttons were here</p>
+                <div id="filesList" style="flex-grow: 1;"></div>
+            </div> -->
+        </div>
+        <div class="pure-g" id="document-row">
+            <div class="pure-u-1-2" style="height: 100%; overflow: scroll;">
+                <div id="left-document"></div>
+            </div>
+            <div class="pure-u-1-2" style="height: 100%; overflow: scroll;">
+                <div id="right-document"></div>
+            </div>
+            <!-- <div class="pure-u-4-24"><h2>
+                <span id="pointsSpan">#</span> /
+                <input type="text" id="maxPoints" size=5/>
+            </h2></div>
+            <div class="pure-u-2-24">
+                <p><button class="button-success pure-button"><i class="fa-solid fa-comment fa-2x"></i></button></p>
+            </div> -->
+        </div>
+    </body>
+</html>
