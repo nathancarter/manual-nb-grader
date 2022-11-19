@@ -55,6 +55,8 @@ export const currentCell = () => firstInClass( mainDocument, 'focused' )
 export const currentNotebook = () => notebookForCell( currentCell() )
 export const currentSelector = () => selectorForCell( currentCell() )
 export const currentDocument = () => documentForCell( currentCell() )
+export const currentIndex = () =>
+    currentNotebook().cellElements().indexOf( currentCell() )
 
 export const moveFocus = target => {
     if ( !target ) return

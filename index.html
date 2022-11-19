@@ -27,8 +27,8 @@
             import { keyboardHandler } from './keyboard.js'
             import {
                 getNotebooks, getSelectors, getDocuments,
-                currentCell, currentNotebook, currentSelector, currentDocument,
-                moveFocus, switchFocus, 
+                moveFocus, switchFocus, currentCell, currentIndex,
+                currentNotebook, currentSelector, currentDocument,
                 notebookForCell, setUpOntology, other
             } from './main-ontology.js'
 
@@ -58,13 +58,13 @@
                     }
                 }
                 const goToPreviousFile = withCurrentSelector( select => {
-                    if ( select.selectedIndex > 0 )
-                        select.selectedIndex--
+                    if ( select.selectedIndex <= 0 ) return false
+                    select.selectedIndex--
                     return true
                 } )
                 const goToNextFile = withCurrentSelector( select => {
-                    if ( select.selectedIndex < select.length - 1 )
-                        select.selectedIndex++
+                    if ( select.selectedIndex >= select.length - 1 ) return false
+                    select.selectedIndex++
                     return true
                 } )
 
@@ -103,17 +103,6 @@
                     }
                 }
 
-                // install menu item event handlers
-                uploadButton.addEventListener( 'click', promptAndUploadFiles, false )
-                clearButton.addEventListener( 'click', () => Files.deleteAll(), false )
-                commentButton.addEventListener( 'click',
-                    () => insertCommentAfter( currentCell() ), false )
-                prevFileButton.addEventListener( 'click', goToPreviousFile, false )
-                nextFileButton.addEventListener( 'click', goToNextFile, false )
-                prevHeadingButton.addEventListener( 'click', goToPreviousHeading, false )
-                nextHeadingButton.addEventListener( 'click', goToNextHeading, false )
-                syncButton.addEventListener( 'click', toggleSync, false )
-
                 // tools for counting/classifying cell elements
                 const withCellDo = func => ( cellElement, ...args ) => {
                     const notebook = notebookForCell( cellElement )
@@ -150,10 +139,13 @@
                         icon.parentNode.addEventListener( 'click',
                             just( () => editCell( cellElement ) ) ) )
                 }
-                // and here are the handlers:
-                const insertCommentAfter = withCellDo( ( notebook, index ) =>
-                    moveFocus( notebook.insertComment( index + 1,
-                        '(new comment -- double-click to edit)' ) ) )
+                // create some event handlers:
+                const insertCommentAfterCurrent = () => {
+                    const notebook = currentNotebook()
+                    if ( notebook )
+                        moveFocus( notebook.insertComment( currentIndex() + 1,
+                            '(new comment -- double-click to edit)' ) )
+                }
                 const deleteComment = withCellDo( ( notebook, index ) => {
                     notebook.deleteCell( index )
                     moveFocus( notebook.cellElements()[index] )
@@ -188,6 +180,16 @@
                     } )
                 } )
 
+                // install menu item event handlers
+                uploadButton.addEventListener( 'click', promptAndUploadFiles, false )
+                clearButton.addEventListener( 'click', () => Files.deleteAll(), false )
+                commentButton.addEventListener( 'click', insertCommentAfterCurrent, false )
+                prevFileButton.addEventListener( 'click', goToPreviousFile, false )
+                nextFileButton.addEventListener( 'click', goToNextFile, false )
+                prevHeadingButton.addEventListener( 'click', goToPreviousHeading, false )
+                nextHeadingButton.addEventListener( 'click', goToNextHeading, false )
+                syncButton.addEventListener( 'click', toggleSync, false )
+
                 // add some keyboard shortcuts
                 document.addEventListener( 'keydown', keyboardHandler( {
                     ArrowUp    : () =>
@@ -196,8 +198,7 @@
                         moveFocus( nextCell( currentCell() ) ),
                     ArrowLeft  : switchFocus,
                     ArrowRight : switchFocus,
-                    '+' : () =>
-                        insertCommentAfter( currentCell() ),
+                    '+' : insertCommentAfterCurrent,
                     Enter : () =>
                         editCell( currentCell() ),
                     'Meta+PageDown' : goToNextFile,
