@@ -19,15 +19,14 @@
             import { Files } from './files.js'
             import { promptAndUploadFiles } from './uploading.js'
             import {
-                addClass, removeClass, containingCell,
-                nextCell, previousCell, scrollToShow, cellOpposite,
+                addClass, removeClass, containingCell, scrollToShow, cellOpposite,
                 withFirstDo, firstHeadingBefore, firstHeadingAfter
             } from './ui-elements.js'
             import { installMarkdownConverter } from './representations.js'
             import { keyboardHandler } from './keyboard.js'
             import {
-                getNotebooks, getSelectors, getDocuments,
-                moveFocus, switchFocus, currentCell, currentIndex,
+                getNotebooks, getSelectors, getDocuments, moveFocus, switchFocus,
+                nextCell, previousCell, currentCell, currentIndex,
                 currentNotebook, currentSelector, currentDocument,
                 notebookForCell, setUpOntology, other
             } from './main-ontology.js'
@@ -192,15 +191,12 @@
 
                 // add some keyboard shortcuts
                 document.addEventListener( 'keydown', keyboardHandler( {
-                    ArrowUp    : () =>
-                        moveFocus( previousCell( currentCell() ) ),
-                    ArrowDown  : () =>
-                        moveFocus( nextCell( currentCell() ) ),
+                    ArrowUp    : () => moveFocus( previousCell() ),
+                    ArrowDown  : () => moveFocus( nextCell() ),
                     ArrowLeft  : switchFocus,
                     ArrowRight : switchFocus,
                     '+' : insertCommentAfterCurrent,
-                    Enter : () =>
-                        editCell( currentCell() ),
+                    Enter : () => editCell( currentCell() ),
                     'Meta+PageDown' : goToNextFile,
                     'Meta+PageUp' : goToPreviousFile,
                     PageDown : goToNextHeading,

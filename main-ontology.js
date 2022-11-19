@@ -2,7 +2,7 @@
 import { Notebook } from './notebooks.js'
 import {
     updateFileSelector, firstInClass, scrollToShow, cellOpposite,
-    addClass, removeClass
+    addClass, removeClass, hasClass
 } from './ui-elements.js'
 import { Files } from './files.js'
 
@@ -71,4 +71,15 @@ export const switchFocus = () => {
     const opp = cellOpposite( cell )
     if ( opp ) moveFocus( opp )
 }
+
+export const previousCell = element =>
+    !element ? previousCell( currentCell() ) :
+    !element.previousSibling ? null :
+    hasClass( element.previousSibling, 'notebook-cell' ) ? element.previousSibling :
+    previousCell( element.previousSibling )
+export const nextCell = element =>
+    !element ? nextCell( currentCell() ) :
+    !element.nextSibling ? null :
+    hasClass( element.nextSibling, 'notebook-cell' ) ? element.nextSibling :
+    nextCell( element.nextSibling )
 

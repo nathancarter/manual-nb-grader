@@ -33,16 +33,6 @@ export const containingCell = element =>
     element.parentNode.id == 'right-document' ? element :
     containingCell( element.parentNode )
 
-export const previousCell = element =>
-    !element.previousSibling ? null :
-    hasClass( element.previousSibling, 'notebook-cell' ) ? element.previousSibling :
-    previousCell( element.previousSibling )
-
-export const nextCell = element =>
-    !element.nextSibling ? null :
-    hasClass( element.nextSibling, 'notebook-cell' ) ? element.nextSibling :
-    nextCell( element.nextSibling )
-
 export const scrollToShow = target => {
     const cellBounding = target.getBoundingClientRect()
     const rowBounding =
