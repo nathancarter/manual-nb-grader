@@ -9,18 +9,6 @@ const uploadFilesArray = filesArray => {
     ).then( () => Files.add( mapping ) )
 }
 
-export const stopDragDropEvents = element => {
-    [ 'dragenter', 'dragover', 'dragleave', 'drop' ].forEach(
-        name => element.addEventListener( name, event => {
-            event.preventDefault()
-            event.stopPropagation()
-        }, false )
-    )
-}
-
-export const uploadDroppedFiles = event =>
-    uploadFilesArray( [ ...event.dataTransfer.files ] )
-
 export const promptAndUploadFiles = event => {
     const fileInput = event.target.ownerDocument.createElement( 'input' )
     fileInput.setAttribute( 'type', 'file' )
