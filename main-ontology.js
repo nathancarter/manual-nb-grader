@@ -2,7 +2,7 @@
 import { Notebook } from './notebooks.js'
 import {
     updateFileSelector, firstInClass, scrollToShow, cellOpposite,
-    addClass, removeClass, hasClass
+    addClass, removeClass, hasClass, containsHeadingWithText
 } from './ui-elements.js'
 import { Files } from './files.js'
 
@@ -71,6 +71,11 @@ export const switchFocus = () => {
     const opp = cellOpposite( cell )
     if ( opp ) moveFocus( opp )
 }
+export const findHeading = ( notebook, text ) => {
+    for ( let cell of notebook.cellElements() )
+        if ( containsHeadingWithText( cell, text ) )
+            return cell
+}
 
 export const previousCell = element =>
     !element ? previousCell( currentCell() ) :
@@ -82,4 +87,3 @@ export const nextCell = element =>
     !element.nextSibling ? null :
     hasClass( element.nextSibling, 'notebook-cell' ) ? element.nextSibling :
     nextCell( element.nextSibling )
-

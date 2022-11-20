@@ -1,8 +1,4 @@
 
-Headings
-
- * Upgrade the previous/next heading navigation to sync iff the toggle is on.
-
 Scores
 
  * When representing comment cells, highlight them as instructor feedback and

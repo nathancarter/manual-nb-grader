@@ -20,7 +20,8 @@
             import { promptAndUploadFiles } from './uploading.js'
             import {
                 addClass, removeClass, containingCell, scrollToShow, cellOpposite,
-                withFirstDo, firstHeadingBefore, firstHeadingAfter
+                withFirstDo, firstHeadingBefore, firstHeadingAfter, firstHeadingIn,
+                containsHeadingWithText
             } from './ui-elements.js'
             import { installMarkdownConverter } from './representations.js'
             import { keyboardHandler } from './keyboard.js'
@@ -28,7 +29,7 @@
                 getNotebooks, getSelectors, getDocuments, moveFocus, switchFocus,
                 nextCell, previousCell, currentCell, currentIndex,
                 currentNotebook, currentSelector, currentDocument,
-                notebookForCell, setUpOntology, other
+                notebookForCell, setUpOntology, other, findHeading
             } from './main-ontology.js'
 
             window.addEventListener( 'load', () => {
@@ -83,23 +84,20 @@
                     syncButton.lastChild.textContent.replace(
                         isSyncing() ? '(on)' : '(off)',
                         isSyncing() ? '(off)' : '(on)' )
+                const syncViews = () => {
+                    const partnerCell = findHeading( other( currentNotebook() ),
+                        firstHeadingIn( currentCell() ).textContent )
+                    if ( !partnerCell ) return
+                    currentCell().scrollIntoView( true )
+                    partnerCell.scrollIntoView( true )
+                }
                 const goToPreviousHeading = () => {
-                    const curr = currentCell()
-                    if ( curr ) {
-                        moveFocus( firstHeadingBefore( curr ) )
-                        if ( isSyncing() ) {
-                            // must build here the "find heading on other side" code
-                        }
-                    }
+                    if ( currentCell() ) moveFocus( firstHeadingBefore( currentCell() ) )
+                    if ( isSyncing() ) syncViews()
                 }
                 const goToNextHeading = () => {
-                    const curr = currentCell()
-                    if ( curr ) {
-                        moveFocus( firstHeadingAfter( curr ) )
-                        if ( isSyncing() ) {
-                            // must build here the "find heading on other side" code
-                        }
-                    }
+                    if ( currentCell() ) moveFocus( firstHeadingAfter( currentCell() ) )
+                    if ( isSyncing() ) syncViews()
                 }
 
                 // tools for counting/classifying cell elements
@@ -140,9 +138,8 @@
                 }
                 // create some event handlers:
                 const insertCommentAfterCurrent = () => {
-                    const notebook = currentNotebook()
-                    if ( notebook )
-                        moveFocus( notebook.insertComment( currentIndex() + 1,
+                    if ( currentNotebook() )
+                        moveFocus( currentNotebook().insertComment( currentIndex() + 1,
                             '(new comment -- double-click to edit)' ) )
                 }
                 const deleteComment = withCellDo( ( notebook, index ) => {
