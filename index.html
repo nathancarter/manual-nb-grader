@@ -19,9 +19,10 @@
             import { Files } from './files.js'
             import { promptAndUploadFiles } from './uploading.js'
             import {
-                addClass, removeClass, containingCell, scrollToShow, cellOpposite,
-                withFirstDo, firstHeadingBefore, firstHeadingAfter, firstHeadingIn,
-                containsHeadingWithText
+                hasClass, addClass, removeClass,
+                containingCell, containsHeadingWithText,
+                scrollToShow, cellOpposite, withFirstDo,
+                firstHeadingBefore, firstHeadingAfter, firstHeadingIn
             } from './ui-elements.js'
             import { installMarkdownConverter } from './representations.js'
             import { keyboardHandler } from './keyboard.js'
@@ -145,6 +146,8 @@
                             '(new comment -- double-click to edit)' ) )
                 }
                 const deleteComment = withCellDo( ( notebook, index ) => {
+                    if ( !hasClass( notebook.cellElements()[index], 'grading-comment' ) )
+                        return
                     notebook.deleteCell( index )
                     moveFocus( notebook.cellElements()[index] )
                 } )
@@ -195,6 +198,8 @@
                     ArrowLeft  : switchFocus,
                     ArrowRight : switchFocus,
                     '+' : insertCommentAfterCurrent,
+                    '=' : () => copyAcross( currentCell() ),
+                    'Shift+Delete' : () => deleteComment( currentCell() ),
                     Enter : () => editCell( currentCell() ),
                     'Meta+PageDown' : goToNextFile,
                     'Meta+PageUp' : goToPreviousFile,
