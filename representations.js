@@ -1,11 +1,12 @@
 
-const cellHTML = ( innerHTML, focused ) => `
-    <div class="${focused ? 'focused' : ''} notebook-cell">
+const cellHTML = ( innerHTML, classes = [ ] ) => `
+    <div class="${classes.join( ' ' )} notebook-cell">
         ${innerHTML}
     </div>
 `
 
 export const cellToHTML = ( cell, focused = false ) => {
+    let classes = focused ? [ 'focused' ] : [ ]
     // Case 1: cell is Markdown source
     if ( cell.cell_type == 'markdown' ) {
         const md = cell.source.join( '' )
@@ -42,8 +43,9 @@ export const cellToHTML = ( cell, focused = false ) => {
                     </ul>
                 </div>
             ` + mainHTML
+            classes.push( 'grading-comment' )
         }
-        return cellHTML( mainHTML, focused )
+        return cellHTML( mainHTML, classes )
     }
     // Case 2: cell is code
     if ( cell.cell_type == 'code' ) {
@@ -51,11 +53,13 @@ export const cellToHTML = ( cell, focused = false ) => {
             '<p><font size="-2">Input:</font></p>',
             `<pre><code>${cell.source.join( '' )}</code></pre>`,
             '<p><font size="-2">Output:</font></p>',
-            ...cell.outputs.map( output => outputToHTML( output ) )
-        ].join( '\n' ), focused )
+            '<div class="cell-output">',
+            ...cell.outputs.map( output => outputToHTML( output ) ),
+            '</div>'
+        ].join( '\n' ), classes )
     }
     // Fallback on generic (and bad) solution:
-    return cellHTML( `<pre>${JSON.stringify( cell, null, 4 )}</pre>`, focused )
+    return cellHTML( `<pre>${JSON.stringify( cell, null, 4 )}</pre>`, classes )
 }
 
 export const cellToDiv = ( document, cell, focused ) => {

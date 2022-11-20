@@ -1,8 +1,7 @@
 
 Scores
 
- * When representing comment cells, highlight them as instructor feedback and
-   specifically highlight lines containing `/[+-](\d+\.\d*|\d*\.\d+)/`.
+ * Specifically highlight lines containing `/[+-](\d+\.\d*|\d*\.\d+)/`.
  * Give Notebooks a method for scoring themselves by summing the scores detected
    in their cells, and place this score in the title bar of each side.
  * Make a hamburger menu item for choosing the initial/default score.
