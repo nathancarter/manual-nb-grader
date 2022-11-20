@@ -131,4 +131,18 @@ export class Notebook extends EventTarget {
         element.innerHTML = html
     }
 
+    totalScore () {
+        if ( !this._data ) return
+        let result = 0
+        this._data.cells.forEach( cell => {
+            if ( cell.cell_type != 'markdown'
+              || !cell.metadata.is_grading_comment ) return
+            cell.source.forEach( line => {
+                if ( /^\s*[+-](?:\d+\.?\d*|\d*\.?\d+)\s*$/.test( line ) )
+                    result += parseFloat( line )
+            } )
+        } )
+        return result
+    }
+
 }

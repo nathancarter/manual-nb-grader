@@ -2,7 +2,8 @@
 Scores
 
  * Display the (always up-to-date) score for a notebook somewhere visible (which
-   will require designing a place to put this!).
+   will require designing a place to put this!).  (Should update in view in
+   response to notebook load/insert/delete events.)
  * Make a hamburger menu item for choosing the initial/default score.
  * Make an action to save the score for a notebook into the notebook (as an
    initial cell and as part of the filename).
