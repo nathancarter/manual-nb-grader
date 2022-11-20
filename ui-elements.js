@@ -120,6 +120,6 @@ export const firstHeadingBefore = node => {
 
 export const containsHeadingWithText = ( element, text ) =>
     headingTagNames.some( tagName =>
-        [ ...element.getElementsByClassName( tagName ) ].some( heading =>
+        [ ...element.getElementsByTagName( tagName ) ].some( heading =>
             heading.textContent.trim().toLowerCase()
                 == text.trim().toLowerCase() ) )
