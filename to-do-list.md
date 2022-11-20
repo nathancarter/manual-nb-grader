@@ -1,9 +1,4 @@
 
-Keyboard shortcuts
-
- * Change all the top buttons to have no text, just icons.
- * Add a menu item for showing the list of keyboard shortcuts.
-
 Scores
 
  * In response to notebook load/insert/delete events, update the score for that

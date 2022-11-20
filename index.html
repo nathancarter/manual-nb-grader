@@ -78,6 +78,7 @@
                 const prevHeadingButton = document.getElementById( 'prev-heading-button' )
                 const nextHeadingButton = document.getElementById( 'next-heading-button' )
                 const syncButton = document.getElementById( 'sync-button' )
+                const keyboardButton = document.getElementById( 'keyboard-button' )
 
                 // actions for syncing and navigating headings
                 const isSyncing = () => syncButton.lastChild.textContent.includes( '(on)' )
@@ -165,6 +166,17 @@
                 } )
                 const editCell = withCellDo( ( notebook, index ) =>
                     notebook.startEditing( index ) )
+                const showShortcuts = () => alert( `
+Cmd+Page up/down - go to previous/next file
+Page up/down - go to previous/next heading
+Arrow up/down - move focus to previous/next cell
+Arrow left/right - switch focus between documents
++ (plus key) - insert comment cell after current cell
+Enter - edit currently selected comment cell
+Shift+Delete - delete currently selected comment cell
+= (equals key) - copy comment cell to other document
+? (question mark) - show this list of shortcuts
+                ` )
 
                 // create two global notebook objects, one for each document
                 getNotebooks().forEach( notebook => {
@@ -190,6 +202,7 @@
                 prevHeadingButton.addEventListener( 'click', goToPreviousHeading, false )
                 nextHeadingButton.addEventListener( 'click', goToNextHeading, false )
                 syncButton.addEventListener( 'click', toggleSync, false )
+                keyboardButton.addEventListener( 'click', showShortcuts, false )
 
                 // add some keyboard shortcuts
                 document.addEventListener( 'keydown', keyboardHandler( {
@@ -204,7 +217,8 @@
                     'Meta+PageDown' : goToNextFile,
                     'Meta+PageUp' : goToPreviousFile,
                     PageDown : goToNextHeading,
-                    PageUp : goToPreviousHeading
+                    PageUp : goToPreviousHeading,
+                    '?' : showShortcuts
                 } ) )
             } )
         </script>
@@ -252,6 +266,11 @@
                         <li class="pure-menu-item" title="Insert comment below current cell">
                             <a href="#" class="pure-menu-link" id="comment-button">
                                 <i class="fa-solid fa-comment"></i>
+                            </a>
+                        </li>
+                        <li class="pure-menu-item" title="Show all keyboard shortcuts">
+                            <a href="#" class="pure-menu-link" id="keyboard-button">
+                                <i class="fa-solid fa-keyboard"></i>
                             </a>
                         </li>
                     </ul>
