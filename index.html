@@ -211,7 +211,7 @@
     </head>
     <body style="margin: 0 10px 0 10px;">
         <div class="pure-g" id="menu-row">
-            <div class="pure-u-1-24">
+            <div class="pure-u-1-1">
                 <div class="pure-menu pure-menu-horizontal">
                     <ul class="pure-menu-list">
                         <li class="pure-menu-item">
@@ -241,25 +241,18 @@
                     </ul>
                 </div>
             </div>
-            <div class="pure-u-11-24">
-            </div>
-            <div class="pure-u-1-2">
-            </div>
         </div>
         <div class="pure-g" id="select-row">
-            <div class="pure-u-1-2">
+            <div class="pure-u-5-12">
                 <select name="left-file-select" id="left-file-select" style="width: 100%;">
                 </select>
             </div>
-            <div class="pure-u-1-2">
+            <div class="pure-u-1-12" id="left-score"></div>
+            <div class="pure-u-5-12">
                 <select name="right-file-select" id="right-file-select" style="width: 100%;">
                 </select>
             </div>
-                <!-- <div class="pure-u-4-24" style="height: 100%; display: flex; flex-flow: column;">
-                <h2>Files</h2>
-                <p>Buttons were here</p>
-                <div id="filesList" style="flex-grow: 1;"></div>
-            </div> -->
+            <div class="pure-u-1-12" id="right-score"></div>
         </div>
         <div class="pure-g" id="document-row">
             <div class="pure-u-1-2" style="height: 100%; overflow: scroll;">
@@ -268,13 +261,6 @@
             <div class="pure-u-1-2" style="height: 100%; overflow: scroll;">
                 <div id="right-document"></div>
             </div>
-            <!-- <div class="pure-u-4-24"><h2>
-                <span id="pointsSpan">#</span> /
-                <input type="text" id="maxPoints" size=5/>
-            </h2></div>
-            <div class="pure-u-2-24">
-                <p><button class="button-success pure-button"><i class="fa-solid fa-comment fa-2x"></i></button></p>
-            </div> -->
         </div>
     </body>
 </html>
