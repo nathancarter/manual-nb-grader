@@ -1,7 +1,6 @@
 
 Scores
 
- * Specifically highlight lines containing `/[+-](\d+\.\d*|\d*\.\d+)/`.
  * Give Notebooks a method for scoring themselves by summing the scores detected
    in their cells, and place this score in the title bar of each side.
  * Make a hamburger menu item for choosing the initial/default score.

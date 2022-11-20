@@ -1,4 +1,13 @@
 
+const highlightScoresInMarkdown = md => {
+    const isAScore = line => /^\s*[+-](?:\d+\.?\d*|\d*\.?\d+)\s*$/.test( line )
+    const highlightLine = line => parseFloat( line ) >= 0 ?
+        `<span class="good-score">${line}</span>` :
+        `<span class="bad-score">${line}</span>`
+    return md.split( '\n' ).map( line =>
+        isAScore( line ) ? highlightLine( line ) : line ).join( '\n' )
+}
+
 const cellHTML = ( innerHTML, classes = [ ] ) => `
     <div class="${classes.join( ' ' )} notebook-cell">
         ${innerHTML}
@@ -9,7 +18,7 @@ export const cellToHTML = ( cell, focused = false ) => {
     let classes = focused ? [ 'focused' ] : [ ]
     // Case 1: cell is Markdown source
     if ( cell.cell_type == 'markdown' ) {
-        const md = cell.source.join( '' )
+        const md = highlightScoresInMarkdown( cell.source.join( '' ) )
         let mainHTML = markdownToHTMLWithLaTeX( md )
         if ( cell.metadata.is_grading_comment ) {
             mainHTML = `
