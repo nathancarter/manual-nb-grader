@@ -117,6 +117,8 @@
                 const installEventHandlersForCell = cellElement => {
                     cellElement.addEventListener( 'click',
                         event => moveFocus( cellElement ) )
+                    cellElement.addEventListener( 'dblclick',
+                        event => editCell( cellElement ) )
                     withFirstDo( cellElement, 'fa-trash', icon =>
                         icon.parentNode.addEventListener( 'click',
                             just( () => deleteComment( cellElement ) ) ) )
