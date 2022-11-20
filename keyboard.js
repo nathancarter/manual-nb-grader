@@ -2,7 +2,7 @@
 const nameMatchesEvent = ( comboName, event ) => {
     const modifiers =
         { meta : false, shift : false, alt : false, control : false }
-    if ( comboName == '+' || comboName == '?' ) {
+    if ( [ '+', '?', '#' ].includes( comboName ) ) {
         modifiers.shift = true
     } else {
         comboName.split( '+' ).forEach( entry => {

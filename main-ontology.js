@@ -9,11 +9,23 @@ import { Files } from './files.js'
 const notebooks = [ null, null ]
 const selectors = [ null, null ]
 const documents = [ null, null ]
+const scores = [ null, null ]
 let mainDocument = null
+let defaultScore = 100
 
 export const getNotebooks = () => notebooks
 export const getSelectors = () => selectors
 export const getDocuments = () => documents
+
+export const getDefaultScore = () => defaultScore
+const updateNotebookScores = () => {
+    scores[0].textContent = getDefaultScore() + notebooks[0].totalScore()
+    scores[1].textContent = getDefaultScore() + notebooks[1].totalScore()
+}
+export const setDefaultScore = score => {
+    defaultScore = score
+    updateNotebookScores()
+}
 
 export const other = thing =>
     thing == notebooks[0] ? notebooks[1] :
@@ -30,12 +42,18 @@ export const setUpOntology = document => {
     documents[1] = document.getElementById( 'right-document' )
     selectors[0] = document.getElementById( 'left-file-select' )
     selectors[1] = document.getElementById( 'right-file-select' )
+    scores[0] = document.getElementById( 'left-score' )
+    scores[1] = document.getElementById( 'right-score' )
     // create a notebook for each document and connect them to the selectors
     notebooks[0] = new Notebook( documents[0] )
     notebooks[1] = new Notebook( documents[1] )
-    for ( let i = 0 ; i < 2 ; i++ )
+    for ( let i = 0 ; i < 2 ; i++ ) {
         selectors[i].addEventListener( 'change', () =>
             notebooks[i].read( selectors[i].value ) )
+        notebooks[i].addEventListener( 'load', updateNotebookScores )
+        notebooks[i].addEventListener( 'insert', updateNotebookScores )
+        notebooks[i].addEventListener( 'delete', updateNotebookScores )
+    }
     // connect "filesystem" changes to file selectors
     const updateFileSelectors = () => selectors.forEach( updateFileSelector )
     Files.addEventListener( 'add', updateFileSelectors )

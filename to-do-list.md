@@ -1,9 +1,6 @@
 
 Scores
 
- * In response to notebook load/insert/delete events, update the score for that
-   notebook in the div with class left-score/right-score.
- * Make a menu item for choosing the initial/default score.
  * Make an action to save the score for a notebook into the notebook (as an
    initial cell and as part of the filename).
 
