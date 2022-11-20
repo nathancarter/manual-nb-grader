@@ -25,27 +25,27 @@ export const cellToHTML = ( cell, focused = false ) => {
                 <div class="pure-menu pure-menu-horizontal"
                      style="height: 2em; text-align: right;">
                     <ul class="pure-menu-list">
-                        <li class="pure-menu-item">
+                        <li class="pure-menu-item" title="Move this comment up one cell">
                             <a href="#" class="pure-menu-link">
                                 <i class="fa-solid fa-arrow-up"></i></a>
                         </li>
-                        <li class="pure-menu-item">
+                        <li class="pure-menu-item" title="Move this comment down one cell">
                             <a href="#" class="pure-menu-link">
                                 <i class="fa-solid fa-arrow-down"></i></a>
                         </li>
-                        <li class="pure-menu-item">
+                        <li class="pure-menu-item" title="Copy this comment to other document">
                             <a href="#" class="pure-menu-link">
                                 <i class="fa-solid fa-arrows-left-right"></i></a>
                         </li>
-                        <li class="pure-menu-item">
+                        <li class="pure-menu-item" title="Duplicate this comment here">
                             <a href="#" class="pure-menu-link">
                                 <i class="fa-solid fa-copy"></i></a>
                         </li>
-                        <li class="pure-menu-item">
+                        <li class="pure-menu-item" title="Edit this comment">
                             <a href="#" class="pure-menu-link">
                                 <i class="fa-solid fa-pen"></i></a>
                         </li>
-                        <li class="pure-menu-item">
+                        <li class="pure-menu-item" title="Delete this comment">
                             <a href="#" class="pure-menu-link">
                                 <i class="fa-solid fa-trash"></i></a>
                         </li>

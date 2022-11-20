@@ -1,8 +1,6 @@
 
 Keyboard shortcuts
 
- * Add hover text to all buttons and menu items that includes a short phrase
-   plus the corresponding keyboard shortcut.
  * Change all the top buttons to have no text, just icons.
  * Add a menu item for showing the list of keyboard shortcuts.
 
