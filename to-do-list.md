@@ -1,9 +1,11 @@
 
 Scores
 
- * Give Notebooks a method for scoring themselves by summing the scores detected
-   in their cells, and place this score in the title bar of each side.
+ * Display the (always up-to-date) score for a notebook somewhere visible (which
+   will require designing a place to put this!).
  * Make a hamburger menu item for choosing the initial/default score.
+ * Make an action to save the score for a notebook into the notebook (as an
+   initial cell and as part of the filename).
 
 Make a zip downloader.
 
