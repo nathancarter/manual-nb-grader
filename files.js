@@ -37,7 +37,7 @@ class FilesModel extends EventTarget {
     }
 
     deleteAll () {
-        this._db.notebooks.clear()
+        return this._db.notebooks.clear()
             .then( () => this.dispatchEvent(
                 new Event( 'deleted-all' ) ) )
     }

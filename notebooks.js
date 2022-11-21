@@ -14,6 +14,13 @@ export class Notebook extends EventTarget {
         if ( filename ) this.read( filename )
     }
 
+    clear () {
+        delete this._filename
+        delete this._data
+        delete this._contents
+        if ( this._element ) this._element.innerHTML = ''
+    }
+
     element () { return this._element }
 
     setInitialScore ( score ) {

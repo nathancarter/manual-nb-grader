@@ -87,6 +87,7 @@
                 const uploadButton = document.getElementById( 'upload-button' )
                 const downloadButton = document.getElementById( 'download-button' )
                 const clearButton = document.getElementById( 'clear-button' )
+                const deleteButton = document.getElementById( 'delete-button' )
                 const commentButton = document.getElementById( 'comment-button' )
                 const prevFileButton = document.getElementById( 'prev-file-button' )
                 const nextFileButton = document.getElementById( 'next-file-button' )
@@ -135,7 +136,10 @@
                 // each cell will need several event handlers installed
                 const installEventHandlersForCell = cellElement => {
                     cellElement.addEventListener( 'click',
-                        event => moveFocus( cellElement ) )
+                        event => {
+                            console.log( event, cellElement )
+                            moveFocus( cellElement )
+                        } )
                     cellElement.addEventListener( 'dblclick',
                         event => editCell( cellElement ) )
                     withFirstDo( cellElement, 'fa-trash', icon =>
@@ -250,7 +254,15 @@ Cmd+Enter - toggle grade cell at top of document
                 }, false )
                 clearButton.addEventListener( 'click', () => {
                     if ( confirm( 'Are you sure you want to delete all the files?' ) )
-                        Files.deleteAll()
+                        Files.deleteAll().then( () => getNotebooks().forEach(
+                            notebook => notebook.clear() ) )
+                }, false )
+                deleteButton.addEventListener( 'click', () => {
+                    if ( !currentNotebook() ) return
+                    const filename = currentNotebook().filename()
+                    if ( confirm( `Are you sure you want to delete ${filename}?` ) )
+                        Files.delete( filename ).then( () =>
+                            currentNotebook().clear() )
                 }, false )
                 commentButton.addEventListener( 'click', insertCommentAfterCurrent, false )
                 prevFileButton.addEventListener( 'click', goToPreviousFile, false )
@@ -321,6 +333,11 @@ Cmd+Enter - toggle grade cell at top of document
                         <li class="pure-menu-item" title="Navigate headings in sync">
                             <a href="#" class="pure-menu-link" id="sync-button">
                                 <i class="fa-solid fa-rotate"></i> (on)
+                            </a>
+                        </li>
+                        <li class="pure-menu-item" title="Delete current file">
+                            <a href="#" class="pure-menu-link" id="delete-button">
+                                <i class="fa-solid fa-trash"></i>
                             </a>
                         </li>
                         <li class="pure-menu-item" title="Delete all files (!)">
