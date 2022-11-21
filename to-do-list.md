@@ -1,8 +1,9 @@
 
 Representation flexibility
 
- * Create slightly different visual styles for markdown/code/output.
- * Use codemirror for editing markdown cells.
+ * Use CodeMirror for editing markdown cells.  (But this turns out to not be
+   worth the effort--importing CodeMirror is a huge hassle for something so
+   small as this need.)
 
 Implement a delete-this-file button (with an Are you sure? prompt, and a
 keyboard shortcut).

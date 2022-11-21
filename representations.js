@@ -54,11 +54,14 @@ export const cellToHTML = ( cell, classes = [ ] ) => {
             classes.push( 'grading-comment' )
         } else if ( cell.metadata.is_grading_score ) {
             classes.push( 'score-cell' )
+        } else {
+            classes.push( 'original-markdown' )
         }
         return cellHTML( mainHTML, classes )
     }
     // Case 2: cell is code
     if ( cell.cell_type == 'code' ) {
+        classes.push( 'code-and-output' )
         return cellHTML( [
             // '<p><font size="-2">Input:</font></p>',
             `<pre><code class="language-placeholder">${cell.source.join( '' )}</code></pre>`,

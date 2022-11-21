@@ -28,8 +28,26 @@
     /* this is a light blue */
 }
 
-.notebook-cell {
-    border: solid 1px #bbbbbb;
+.notebook-cell.original-markdown {
+    border: solid 1px #dddddd;
+    padding: 0 0.5em 0 0.5em;
+    margin: 0.5em 0 0.5em 0;
+}
+
+.notebook-cell.score-cell {
+    border: solid 1px rgb(155, 155, 0);
+    padding: 0 0.5em 0 0.5em;
+    margin: 0.5em 0 0.5em 0;
+}
+
+.notebook-cell.grading-comment {
+    border: solid 1px rgb(155, 155, 0);
+    padding: 0 0.5em 0 0.5em;
+    margin: 0.5em 0 0.5em 0;
+}
+
+.notebook-cell.code-and-output {
+    border: solid 2px #888888;
     padding: 0 0.5em 0 0.5em;
     margin: 0.5em 0 0.5em 0;
 }
