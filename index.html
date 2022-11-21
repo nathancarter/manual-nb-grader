@@ -35,7 +35,7 @@
                 getNotebooks, getSelectors, getDocuments, moveFocus, switchFocus,
                 nextCell, previousCell, currentCell, currentIndex,
                 currentNotebook, currentSelector, currentDocument,
-                notebookForCell, setUpOntology, other, findHeading,
+                notebookForCell, setUpOntology, other, findHeading, firstCellInView,
                 getDefaultScore, setDefaultScore,
                 filenameWithGrade, filenameWithoutGrade, renameFile
             } from './main-ontology.js'
@@ -232,6 +232,17 @@ Cmd+Enter - toggle grade cell at top of document
                         moveFocus( notebook.cellElements()[0] )
                         MathJax.typeset()
                         highlightWhatsNew()
+                        if ( isSyncing() ) {
+                            const oldHeadingCell = firstCellInView( other( notebook ) )
+                            if ( oldHeadingCell && firstHeadingIn( oldHeadingCell ) ) {
+                                const partnerCell = findHeading( notebook,
+                                    firstHeadingIn( oldHeadingCell ).textContent )
+                                if ( partnerCell ) {
+                                    moveFocus( partnerCell )
+                                    partnerCell.scrollIntoView( true )
+                                }
+                            }
+                        }
                     } )
                     notebook.addEventListener( 'insert', event => {
                         installEventHandlersForCell( event.detail.cell )

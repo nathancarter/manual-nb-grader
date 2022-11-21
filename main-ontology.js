@@ -112,6 +112,12 @@ export const findHeading = ( notebook, text ) => {
         if ( containsHeadingWithText( cell, text ) )
             return cell
 }
+export const firstCellInView = notebook => {
+    const row = mainDocument.getElementById( 'document-row' )
+    const top = row.getBoundingClientRect().top
+    for ( let cell of notebook.cellElements() )
+        if ( cell.getBoundingClientRect().top >= top ) return cell
+}
 
 export const previousCell = element =>
     !element ? previousCell( currentCell() ) :
