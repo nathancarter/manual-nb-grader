@@ -144,8 +144,8 @@ export class Notebook extends EventTarget {
            || this._data.metadata.language_info.name ) : ''
         this.cells().forEach( cell =>
             html += cellToHTML( cell ).replace(
-                '<code language="language-placeholder">',
-                `<code language="${language}">` ) )
+                '<code class="language-placeholder">',
+                `<code class="${language}">` ) )
         element.innerHTML = html
     }
 

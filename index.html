@@ -49,6 +49,13 @@
                 const converter = new showdown.Converter()
                 installMarkdownConverter( md => converter.makeHtml( md ) )
 
+                // highlighting function
+                const highlightWhatsNew = () =>
+                    document.querySelectorAll( 'pre code' ).forEach( element => {
+                        if ( !hasClass( element, 'hljs' ) )
+                            hljs.highlightElement( element )
+                    } )
+
                 // set up correct height for row containing documents
                 const topHeight = document.getElementById( 'menu-row' ).offsetHeight
                                 + document.getElementById( 'select-row' ).offsetHeight
@@ -220,13 +227,13 @@ Cmd+Enter - toggle grade cell at top of document
                             installEventHandlersForCell )
                         moveFocus( notebook.cellElements()[0] )
                         MathJax.typeset()
-                        hljs.highlightAll()
+                        highlightWhatsNew()
                     } )
                     notebook.addEventListener( 'insert', event => {
                         installEventHandlersForCell( event.detail.cell )
                         moveFocus( event.detail.cell )
                         MathJax.typeset()
-                        hljs.highlightAll()
+                        highlightWhatsNew()
                     } )
                 } )
 
