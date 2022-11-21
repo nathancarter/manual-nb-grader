@@ -9,6 +9,8 @@
               content="width=device-width, height=device-height, initial-scale=1"/>
         <script src="https://kit.fontawesome.com/74c71ba5ba.js" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
         <script>
             MathJax = { tex: { inlineMath:  [['$', '$']],
                                displayMath: [['$$', '$$']] } };
@@ -73,6 +75,7 @@
 
                 // name main UI controls
                 const uploadButton = document.getElementById( 'upload-button' )
+                const downloadButton = document.getElementById( 'download-button' )
                 const clearButton = document.getElementById( 'clear-button' )
                 const commentButton = document.getElementById( 'comment-button' )
                 const prevFileButton = document.getElementById( 'prev-file-button' )
@@ -224,6 +227,15 @@ Cmd+Enter - toggle grade cell at top of document
 
                 // install menu item event handlers
                 uploadButton.addEventListener( 'click', promptAndUploadFiles, false )
+                downloadButton.addEventListener( 'click', () => {
+                    Files.allEntries().then( entries => {
+                        const zip = new JSZip()
+                        entries.forEach( entry =>
+                            zip.file( entry.name, entry.contents ) )
+                        zip.generateAsync( { type : 'blob' } ).then( blob =>
+                            saveAs( blob, 'Notebooks.zip' ) )
+                    } )
+                }, false )
                 clearButton.addEventListener( 'click', () => {
                     if ( confirm( 'Are you sure you want to delete all the files?' ) )
                         Files.deleteAll()
@@ -267,6 +279,11 @@ Cmd+Enter - toggle grade cell at top of document
                         <li class="pure-menu-item" title="Upload a set of files">
                             <a href="#" class="pure-menu-link" id="upload-button">
                                 <i class="fa-solid fa-file-arrow-up"></i>
+                            </a>
+                        </li>
+                        <li class="pure-menu-item" title="Download zip of all files">
+                            <a href="#" class="pure-menu-link" id="download-button">
+                                <i class="fa-solid fa-file-arrow-down"></i>
                             </a>
                         </li>
                         <li class="pure-menu-item" title="Navigate to previous file">

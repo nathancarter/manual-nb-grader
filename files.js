@@ -10,8 +10,12 @@ class FilesModel extends EventTarget {
     }
 
     names () {
-        return this._db.notebooks.toArray().then( entries =>
-            entries.map( entry => entry.name ) )
+        return this._db.notebooks.toArray().then(
+            entries => entries.map( entry => entry.name ) )
+    }
+
+    allEntries () {
+        return this._db.notebooks.toArray()
     }
 
     add ( nameToContentsMapping ) {

@@ -1,6 +1,4 @@
 
-Make a zip downloader.
-
 Representation flexibility
 
  * Create slightly different visual styles for markdown/code/output.
