@@ -11,6 +11,9 @@
         <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+        <link rel="stylesheet"
+              href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/styles/atom-one-light.min.css"/>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.6.0/highlight.min.js"></script>
         <script>
             MathJax = { tex: { inlineMath:  [['$', '$']],
                                displayMath: [['$$', '$$']] } };
@@ -217,11 +220,13 @@ Cmd+Enter - toggle grade cell at top of document
                             installEventHandlersForCell )
                         moveFocus( notebook.cellElements()[0] )
                         MathJax.typeset()
+                        hljs.highlightAll()
                     } )
                     notebook.addEventListener( 'insert', event => {
                         installEventHandlersForCell( event.detail.cell )
                         moveFocus( event.detail.cell )
                         MathJax.typeset()
+                        hljs.highlightAll()
                     } )
                 } )
 

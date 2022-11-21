@@ -60,9 +60,9 @@ export const cellToHTML = ( cell, classes = [ ] ) => {
     // Case 2: cell is code
     if ( cell.cell_type == 'code' ) {
         return cellHTML( [
-            '<p><font size="-2">Input:</font></p>',
-            `<pre><code>${cell.source.join( '' )}</code></pre>`,
-            '<p><font size="-2">Output:</font></p>',
+            // '<p><font size="-2">Input:</font></p>',
+            `<pre><code language="language-placeholder">${cell.source.join( '' )}</code></pre>`,
+            // '<p><font size="-2">Output:</font></p>',
             '<div class="cell-output">',
             ...cell.outputs.map( output => outputToHTML( output ) ),
             '</div>'

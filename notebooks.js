@@ -139,7 +139,13 @@ export class Notebook extends EventTarget {
     populate ( element ) {
         let html = ''
         html += '<div class="cell-zero notebook-cell"></div>'
-        this.cells().forEach( cell => html += cellToHTML( cell ) )
+        const language = this._data ?
+            ( this._data.metadata.kernelspec.language
+           || this._data.metadata.language_info.name ) : ''
+        this.cells().forEach( cell =>
+            html += cellToHTML( cell ).replace(
+                '<code language="language-placeholder">',
+                `<code language="${language}">` ) )
         element.innerHTML = html
     }
 
