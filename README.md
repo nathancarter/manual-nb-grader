@@ -28,7 +28,7 @@ requirement.  You then do this:
    put them on a server in the cloud; it just puts them in your browser's own
    storage.  I never see your files.)
  * Pick the solution file from one dropdown list and a student's work in the
-   other.
+   other.  (See screenshot below.)
  * If you like to grade all of one student's work before moving to other students:
     * Use Page up/down to navigate them in sync, matching the headings as you move
       through the documents.  This works best if you are the type of i
@@ -45,6 +45,10 @@ requirement.  You then do this:
    at the top, and alter the filename to include the grade as well.
  * After grading all files, click the download button to get them back onto your
    hard drive, for sharing with students.
+
+## Screenshot
+
+![Web app screenshot](app-screen-shot.png)
 
 ## License
 
