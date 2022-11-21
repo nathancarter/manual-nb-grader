@@ -29,7 +29,9 @@
                 scrollToShow, cellOpposite, withFirstDo,
                 firstHeadingBefore, firstHeadingAfter, firstHeadingIn
             } from './ui-elements.js'
-            import { installMarkdownConverter } from './representations.js'
+            import {
+                installMarkdownConverter, prepareForDownload
+            } from './representations.js'
             import { keyboardHandler } from './keyboard.js'
             import {
                 getNotebooks, getSelectors, getDocuments, moveFocus, switchFocus,
@@ -257,8 +259,8 @@ Cmd+Enter - toggle grade cell at top of document
                 downloadButton.addEventListener( 'click', () => {
                     Files.allEntries().then( entries => {
                         const zip = new JSZip()
-                        entries.forEach( entry =>
-                            zip.file( entry.name, entry.contents ) )
+                        entries.forEach( entry => zip.file( entry.name,
+                            prepareForDownload( entry.contents ) ) )
                         zip.generateAsync( { type : 'blob' } ).then( blob =>
                             saveAs( blob, 'Notebooks.zip' ) )
                     } )

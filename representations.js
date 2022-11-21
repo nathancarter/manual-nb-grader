@@ -136,3 +136,18 @@ const markdownToHTMLWithLaTeX = md => {
         html = html.replace( key, mapping[key].replace( /\$/g, '$$$$' ) ) )
     return html
 }
+
+const style = 'background-color: rgba(255, 255, 0, 0.2); '
+            + 'border: solid 1px rgb(155, 155, 0); '
+            + 'padding: 1em;'
+const highlightComment = source =>
+    [ `<div style="${style}">`, ...source, '</div>' ]
+export const prepareForDownload = nbJSON => {
+    const nbObj = JSON.parse( nbJSON )
+    nbObj.cells.forEach( ( cell, index ) => {
+        if ( cell.metadata.is_grading_comment
+          || cell.metadata.is_grading_score )
+            nbObj.cells[index].source = highlightComment( cell.source )
+    } )
+    return JSON.stringify( nbObj )
+}
