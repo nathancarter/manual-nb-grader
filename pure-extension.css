@@ -53,7 +53,7 @@
 }
 
 .focused {
-    border: 2px dashed black;
+    border: 2px dashed black !important;
 }
 
 .cell-zero {
