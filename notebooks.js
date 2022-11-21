@@ -1,7 +1,8 @@
 
 import { Files } from './files.js'
 import { cellToHTML, cellToDiv } from './representations.js'
-import { swapContents } from './ui-elements.js'
+import { swapContents, hasClass } from './ui-elements.js'
+import { renameFile } from './main-ontology.js'
 
 export class Notebook extends EventTarget {
 
@@ -9,10 +10,17 @@ export class Notebook extends EventTarget {
         super()
         this._filename = filename
         this._element = element
+        this._initialScore = 100
         if ( filename ) this.read( filename )
     }
 
     element () { return this._element }
+
+    setInitialScore ( score ) {
+        this._initialScore = score
+        this.updateScoreCell()
+    }
+    getInitialScore () { return this._initialScore }
 
     read ( filename ) {
         this._filename = filename
@@ -25,9 +33,12 @@ export class Notebook extends EventTarget {
         } )
     }
 
-    write () {
+    filename () { return this._filename }
+
+    write ( suppressFileEvents = false ) {
         if ( !this._filename || !this._data ) return
-        return Files.write( this._filename, JSON.stringify( this._data ) )
+        return Files.write( this._filename, JSON.stringify( this._data ),
+                            suppressFileEvents )
     }
 
     // there is an import indexing confusion; see comments below
@@ -45,7 +56,7 @@ export class Notebook extends EventTarget {
         return [ ...this._element.getElementsByClassName( 'notebook-cell' ) ]
     }
 
-    insertComment ( index, markdown ) {
+    insertComment ( index, markdown, classes = [ ] ) {
         if ( !this._data ) return
         const newCell = {
             cell_type : 'markdown',
@@ -54,7 +65,8 @@ export class Notebook extends EventTarget {
         }
         this._data.cells.splice( index - 1, 0, newCell )
         const oldElements = this.cellElements()
-        const newElement = cellToDiv( this._element.ownerDocument, newCell )
+        const newElement =
+            cellToDiv( this._element.ownerDocument, newCell, classes )
         if ( index < oldElements.length )
             this._element.insertBefore( newElement, oldElements[index] )
         else
@@ -65,14 +77,14 @@ export class Notebook extends EventTarget {
         return newElement
     }
 
-    deleteCell ( index ) {
+    deleteCell ( index, suppressFileEvents = false ) {
         if ( !this._data ) return
         this._data.cells.splice( index - 1, 1 )
         const elementToDelete = this.cellElements()[index]
         elementToDelete.parentNode.removeChild( elementToDelete )
         this.dispatchEvent( new CustomEvent( 'delete',
             { detail : { cell : elementToDelete } } ) )
-        this.write()
+        this.write( suppressFileEvents )
     }
 
     commentMarkdown ( index ) {
@@ -142,7 +154,53 @@ export class Notebook extends EventTarget {
                     result += parseFloat( line )
             } )
         } )
-        return result
+        return this._initialScore + result
+    }
+
+    getScoreCell () {
+        if ( !this._data ) return
+        const candidates = this.cellElements().filter( element =>
+            hasClass( element, 'score-cell' ) )
+        return candidates.length > 0 ? candidates[0] : null
+    }
+
+    addScoreCell ( suppressFileEvents = false ) {
+        if ( this.getScoreCell() ) return
+        const newCell = {
+            cell_type : 'markdown',
+            metadata : { is_grading_score : true },
+            source : [ `Grade: ${this.totalScore()}\n` ]
+        }
+        this._data.cells.splice( 0, 0, newCell )
+        const newElement =
+            cellToDiv( this._element.ownerDocument, newCell, [ 'score-cell' ] )
+        this._element.insertBefore( newElement,
+                                    this.cellElements()[0].nextSibling )
+        this.dispatchEvent( new CustomEvent( 'insert',
+            { detail : { cell : newElement } } ) )
+        this.write( suppressFileEvents )
+        return newElement
+    }
+
+    deleteScoreCell ( suppressFileEvents = false ) {
+        if ( !this.getScoreCell() ) return
+        this.deleteCell( 1, suppressFileEvents )
+    }
+
+    updateScoreCell () {
+        const toUpdate = this.getScoreCell()
+        if ( !toUpdate ) return
+        this._data.cells[0].source = [ `Grade: ${this.totalScore()}\n` ]
+        toUpdate.innerHTML = cellToDiv( this._element.ownerDocument,
+                                        this._data.cells[0],
+                                        [ 'score-cell' ] ).innerHTML
+        this.write()
+    }
+
+    rename ( newName ) {
+        const oldName = this._filename
+        this._filename = newName
+        return renameFile( oldName, newName )
     }
 
 }

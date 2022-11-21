@@ -31,7 +31,8 @@
                 nextCell, previousCell, currentCell, currentIndex,
                 currentNotebook, currentSelector, currentDocument,
                 notebookForCell, setUpOntology, other, findHeading,
-                getDefaultScore, setDefaultScore
+                getDefaultScore, setDefaultScore,
+                filenameWithGrade, filenameWithoutGrade, renameFile
             } from './main-ontology.js'
 
             window.addEventListener( 'load', () => {
@@ -81,6 +82,7 @@
                 const syncButton = document.getElementById( 'sync-button' )
                 const keyboardButton = document.getElementById( 'keyboard-button' )
                 const setScoreButton = document.getElementById( 'set-score-button' )
+                const toggleGradeButton = document.getElementById( 'toggle-grade-button' )
 
                 // actions for syncing and navigating headings
                 const isSyncing = () => syncButton.lastChild.textContent.includes( '(on)' )
@@ -179,10 +181,30 @@ Shift+Delete - delete currently selected comment cell
 = (equals key) - copy comment cell to other document
 ? (question mark) - show this list of shortcuts
 # (number sign) - set initial/maximum score
+Cmd+Enter - toggle grade cell at top of document
                 ` )
                 const setScore = () => {
                     const response = prompt( 'Intial/maximum score:', getDefaultScore() )
                     if ( response != null ) setDefaultScore( parseFloat( response ) )
+                }
+                const toggleGrade = () => {
+                    const notebook = currentNotebook()
+                    if ( notebook ) {
+                        if ( notebook.getScoreCell() ) {
+                            notebook.deleteScoreCell( true )
+                            moveFocus( notebook.cellElements()[0] )
+                            const newName = filenameWithoutGrade( notebook.filename() )
+                            notebook.rename( newName ).then( () =>
+                                currentSelector().value = newName )
+                        } else {
+                            notebook.addScoreCell( true )
+                            moveFocus( notebook.getScoreCell() )
+                            const newName = filenameWithGrade( notebook.filename(),
+                                notebook.totalScore() )
+                            notebook.rename( newName ).then( () =>
+                                currentSelector().value = newName )
+                        }
+                    }
                 }
 
                 // create two global notebook objects, one for each document
@@ -202,7 +224,10 @@ Shift+Delete - delete currently selected comment cell
 
                 // install menu item event handlers
                 uploadButton.addEventListener( 'click', promptAndUploadFiles, false )
-                clearButton.addEventListener( 'click', () => Files.deleteAll(), false )
+                clearButton.addEventListener( 'click', () => {
+                    if ( confirm( 'Are you sure you want to delete all the files?' ) )
+                        Files.deleteAll()
+                }, false )
                 commentButton.addEventListener( 'click', insertCommentAfterCurrent, false )
                 prevFileButton.addEventListener( 'click', goToPreviousFile, false )
                 nextFileButton.addEventListener( 'click', goToNextFile, false )
@@ -211,6 +236,7 @@ Shift+Delete - delete currently selected comment cell
                 syncButton.addEventListener( 'click', toggleSync, false )
                 keyboardButton.addEventListener( 'click', showShortcuts, false )
                 setScoreButton.addEventListener( 'click', setScore, false )
+                toggleGradeButton.addEventListener( 'click', toggleGrade, false )
 
                 // add some keyboard shortcuts
                 document.addEventListener( 'keydown', keyboardHandler( {
@@ -227,7 +253,8 @@ Shift+Delete - delete currently selected comment cell
                     PageDown : goToNextHeading,
                     PageUp : goToPreviousHeading,
                     '?' : showShortcuts,
-                    '#' : setScore
+                    '#' : setScore,
+                    'Meta+Enter' : toggleGrade
                 } ) )
             } )
         </script>
@@ -280,6 +307,11 @@ Shift+Delete - delete currently selected comment cell
                         <li class="pure-menu-item" title="Set initial/maximum score">
                             <a href="#" class="pure-menu-link" id="set-score-button">
                                 <i class="fa-solid fa-ranking-star"></i>
+                            </a>
+                        </li>
+                        <li class="pure-menu-item" title="Toggle grade cell at top">
+                            <a href="#" class="pure-menu-link" id="toggle-grade-button">
+                                <i class="fa-solid fa-square-check"></i>
                             </a>
                         </li>
                         <li class="pure-menu-item" title="Show all keyboard shortcuts">

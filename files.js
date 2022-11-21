@@ -43,10 +43,24 @@ class FilesModel extends EventTarget {
             .then( entry => entry ? entry.contents : undefined )
     }
 
-    write ( name, contents ) {
+    write ( name, contents, suppressEvents = false ) {
         return this._db.notebooks.put( { name, contents } )
-            .then( () => this.dispatchEvent(
-                new CustomEvent( 'change', { detail : name } ) ) )
+            .then( () => {
+                if ( !suppressEvents )
+                    this.dispatchEvent(
+                        new CustomEvent( 'change', { detail : name } ) )
+            } )
+    }
+
+    rename ( oldName, newName ) {
+        return this.read( oldName ).then( contents => {
+            return this._db.notebooks.where( 'name' ).equals( oldName ).delete().then(
+                () => this.write( newName, contents, true )
+            ).then(
+                () => this.dispatchEvent(
+                    new CustomEvent( 'rename', { oldName, newName } ) )
+            )
+        } )
     }
 
     debug () {

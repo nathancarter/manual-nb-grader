@@ -71,8 +71,8 @@ export const updateFileSelector = selector => {
     while ( selector.childNodes.length > 0 )
         selector.removeChild( selector.childNodes[0] )
     const defaultChoice = '< choose a file >'
-    Files.names().then( names => {
-        const oldValue = selector.value
+    return Files.names().then( names => {
+        const oldValue = selector.valueToRestore || selector.value
         ;[ defaultChoice, ...names ].forEach( text => {
             const option = document.createElement( 'option' )
             option.setAttribute( 'value', text )
@@ -80,6 +80,7 @@ export const updateFileSelector = selector => {
             selector.appendChild( option )
         } )
         selector.value = oldValue
+        selector.valueToRestore = null
         if ( selector.value == '' ) selector.value = defaultChoice
     } )
 }

@@ -1,9 +1,4 @@
 
-Scores
-
- * Make an action to save the score for a notebook into the notebook (as an
-   initial cell and as part of the filename).
-
 Make a zip downloader.
 
 Representation flexibility
@@ -14,5 +9,7 @@ Representation flexibility
 
 Implement a delete-this-file button (with an Are you sure? prompt, and a
 keyboard shortcut).
+
+When a user deletes all files, clear both notebook displays.
 
 Maybe let users also edit any markdown cell?

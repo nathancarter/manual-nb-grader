@@ -14,8 +14,7 @@ const cellHTML = ( innerHTML, classes = [ ] ) => `
     </div>
 `
 
-export const cellToHTML = ( cell, focused = false ) => {
-    let classes = focused ? [ 'focused' ] : [ ]
+export const cellToHTML = ( cell, classes = [ ] ) => {
     // Case 1: cell is Markdown source
     if ( cell.cell_type == 'markdown' ) {
         const md = highlightScoresInMarkdown( cell.source.join( '' ) )
@@ -53,6 +52,8 @@ export const cellToHTML = ( cell, focused = false ) => {
                 </div>
             ` + mainHTML
             classes.push( 'grading-comment' )
+        } else if ( cell.metadata.is_grading_score ) {
+            classes.push( 'score-cell' )
         }
         return cellHTML( mainHTML, classes )
     }
@@ -71,9 +72,9 @@ export const cellToHTML = ( cell, focused = false ) => {
     return cellHTML( `<pre>${JSON.stringify( cell, null, 4 )}</pre>`, classes )
 }
 
-export const cellToDiv = ( document, cell, focused ) => {
+export const cellToDiv = ( document, cell, classes = [ ] ) => {
     const temp = document.createElement( 'div' )
-    temp.innerHTML = cellToHTML( cell, focused )
+    temp.innerHTML = cellToHTML( cell, classes )
     const result = [ ...temp.getElementsByClassName( 'notebook-cell' ) ][0]
     temp.removeChild( result )
     return result

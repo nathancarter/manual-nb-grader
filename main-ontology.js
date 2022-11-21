@@ -11,21 +11,24 @@ const selectors = [ null, null ]
 const documents = [ null, null ]
 const scores = [ null, null ]
 let mainDocument = null
-let defaultScore = 100
 
 export const getNotebooks = () => notebooks
 export const getSelectors = () => selectors
 export const getDocuments = () => documents
 
-export const getDefaultScore = () => defaultScore
+export const getDefaultScore = () => notebooks[0].getInitialScore()
 const updateNotebookScores = () => {
-    scores[0].textContent = getDefaultScore() + notebooks[0].totalScore()
-    scores[1].textContent = getDefaultScore() + notebooks[1].totalScore()
+    scores[0].textContent = notebooks[0].totalScore()
+    scores[1].textContent = notebooks[1].totalScore()
+    notebooks.forEach( notebook => notebook.updateScoreCell() )
 }
 export const setDefaultScore = score => {
-    defaultScore = score
+    notebooks.forEach( notebook => notebook.setInitialScore( score ) )
     updateNotebookScores()
 }
+
+const updateFileSelectors = () =>
+    Promise.all( selectors.map( updateFileSelector ) )
 
 export const other = thing =>
     thing == notebooks[0] ? notebooks[1] :
@@ -55,11 +58,26 @@ export const setUpOntology = document => {
         notebooks[i].addEventListener( 'delete', updateNotebookScores )
     }
     // connect "filesystem" changes to file selectors
-    const updateFileSelectors = () => selectors.forEach( updateFileSelector )
     Files.addEventListener( 'add', updateFileSelectors )
     Files.addEventListener( 'delete', updateFileSelectors )
     Files.addEventListener( 'deleted-all', updateFileSelectors )
     updateFileSelectors()
+}
+
+export const renameFile = ( oldName, newName ) => {
+    selectors.forEach( sel =>
+        sel.valueToRestore = sel.value == oldName ? newName : sel.value )
+    return Files.rename( oldName, newName ).then( updateFileSelectors )
+}
+export const filenameWithGrade = ( filename, grade ) => {
+    const pos = filename.lastIndexOf( '.' )
+    return filename.substring( 0, pos ) + ' grade=' + grade
+         + filename.substring( pos )
+}
+export const filenameWithoutGrade = filename => {
+    const pos1 = filename.indexOf( ' grade=' )
+    const pos2 = filename.lastIndexOf( '.' )
+    return filename.substring( 0, pos1 ) + filename.substring( pos2 )
 }
 
 const sideIndexForCell = cell =>
