@@ -27,6 +27,9 @@ requirement.  You then do this:
  * Click the upload button and upload your files.  (This does not actually
    put them on a server in the cloud; it just puts them in your browser's own
    storage.  I never see your files.)
+
+![Arrow pointing to upload files button](images/screenshot-upload.png)
+
  * Pick the solution file from one dropdown list and a student's work in the
    other.  (See screenshot below.)
  * If you like to grade all of one student's work before moving to other students:
