@@ -14,10 +14,13 @@ const cellHTML = ( innerHTML, classes = [ ] ) => `
     </div>
 `
 
+const cellSource = cell =>
+    cell.source instanceof Array ? cell.source.join( '' ) : cell.source
+
 export const cellToHTML = ( cell, classes = [ ] ) => {
     // Case 1: cell is Markdown source
     if ( cell.cell_type == 'markdown' ) {
-        const md = highlightScoresInMarkdown( cell.source.join( '' ) )
+        const md = highlightScoresInMarkdown( cellSource( cell ) )
         let mainHTML = markdownToHTMLWithLaTeX( md )
         if ( cell.metadata.is_grading_comment ) {
             mainHTML = `
@@ -64,7 +67,7 @@ export const cellToHTML = ( cell, classes = [ ] ) => {
         classes.push( 'code-and-output' )
         return cellHTML( [
             // '<p><font size="-2">Input:</font></p>',
-            `<pre><code class="language-placeholder">${cell.source.join( '' )}</code></pre>`,
+            `<pre><code class="language-placeholder">${cellSource( cell )}</code></pre>`,
             // '<p><font size="-2">Output:</font></p>',
             '<div class="cell-output">',
             ...cell.outputs.map( output => outputToHTML( output ) ),
