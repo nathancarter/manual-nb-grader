@@ -6,7 +6,12 @@
         {
             "label": "Launch simple web server",
             "type": "shell",
-            "command": "python3 -m http.server"
+            "command": "python3 -m http.server",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
