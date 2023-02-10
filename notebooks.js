@@ -145,10 +145,15 @@ export class Notebook extends EventTarget {
 
     populate ( element ) {
         let html = ''
+        // create empty top cell
         html += '<div class="cell-zero notebook-cell"></div>'
-        const language = this._data ?
-            ( this._data.metadata.kernelspec.language
-           || this._data.metadata.language_info.name ) : ''
+        // find the language, or guess python if there isn't one
+        let language = 'python'
+        if ( this._data && this._data.metadata && this._data.metadata.kernelspec )
+            language = this._data.metadata.kernelspec.language
+        if ( this._data && this._data.metadata && this._data.metadata.language_info )
+            language = this._data.metadata.language_info.name
+        // apply it to all the cells for syntax highlighting purposes
         this.cells().forEach( cell =>
             html += cellToHTML( cell ).replace(
                 '<code class="language-placeholder">',
